@@ -99,7 +99,6 @@ const Dashboard: React.FC = () => {
   };
 
   const formatTimeSinceLastSync = (seconds: number) => {
-    
     const remainingSeconds = seconds % 60;
     return `${remainingSeconds}s ago`;
   };
@@ -133,6 +132,7 @@ const Dashboard: React.FC = () => {
           onRequestClose={closeModal}
           partnerData={selectedPartner}
           onPartnerUpdated={handlePartnerUpdated}
+          refetchPartners={() => fetchPartners(localStorage.getItem('userEmail') || '', localStorage.getItem('password') || '')} // Pass refetch function
         />
       )}
     </div>

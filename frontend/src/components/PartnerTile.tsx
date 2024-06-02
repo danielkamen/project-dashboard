@@ -28,6 +28,7 @@ const PartnerTile: React.FC<PartnerTileProps> = ({ partnerData, onDelete, onEdit
         <p>Last Updated: {partnerData.lastUpdated ? formatDate(partnerData.lastUpdated) : 'N/A'}</p>
         <p>Updated By: {partnerData.updatedBy}</p>
         <p>Active: {partnerData.active ? 'Yes' : 'No'}</p>
+        <p>Users Working on Project: {partnerData.formattedUsersWorkingOnProject}</p>
         <button onClick={handleEditClick}>Edit</button>
         <button onClick={handleDeleteClick}>Delete</button>
       </div>

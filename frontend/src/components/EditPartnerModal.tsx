@@ -8,6 +8,7 @@ interface EditPartnerModalProps {
   onRequestClose: () => void;
   partnerData: PartnerData;
   onPartnerUpdated: (updatedPartner: PartnerData) => void;
+  refetchPartners: () => void;
 }
 
 const customStyles = {
@@ -23,13 +24,14 @@ const customStyles = {
 
 Modal.setAppElement('#root');
 
-const EditPartnerModal: React.FC<EditPartnerModalProps> = ({ isOpen, onRequestClose, partnerData, onPartnerUpdated }) => {
+const EditPartnerModal: React.FC<EditPartnerModalProps> = ({ isOpen, onRequestClose, partnerData, refetchPartners }) => {
   const [name, setName] = useState(partnerData.name);
   const [logoUrl, setLogoUrl] = useState(partnerData.logoUrl);
   const [description, setDescription] = useState(partnerData.description);
   const [repoPath, setRepoPath] = useState(partnerData.repoPath);
   const [active, setActive] = useState(partnerData.active);
   const [error, setError] = useState<string | null>(null);
+  const [isWorkingOnProject, setIsWorkingOnProject] = useState(false);
 
   useEffect(() => {
     setName(partnerData.name);
@@ -37,6 +39,8 @@ const EditPartnerModal: React.FC<EditPartnerModalProps> = ({ isOpen, onRequestCl
     setDescription(partnerData.description);
     setRepoPath(partnerData.repoPath);
     setActive(partnerData.active);
+    const userEmail = localStorage.getItem('userEmail');
+    setIsWorkingOnProject(partnerData.usersWorkingOnProject.includes(userEmail || ''));
   }, [partnerData]);
 
   const handleUpdatePartner = async (e: React.FormEvent) => {
@@ -52,8 +56,6 @@ const EditPartnerModal: React.FC<EditPartnerModalProps> = ({ isOpen, onRequestCl
 
     const updatedPartnerData = { ...partnerData, name, logoUrl, description, repoPath, active };
 
-    console.log('Sending updated partner data:', updatedPartnerData);
-
     try {
       const response = await axios.put<PartnerData>(`http://localhost:8080/api/partners/${partnerData.id}`, updatedPartnerData, {
         headers: {
@@ -63,9 +65,23 @@ const EditPartnerModal: React.FC<EditPartnerModalProps> = ({ isOpen, onRequestCl
       });
 
       if (response.status === 200) {
-        console.log('Partner updated successfully:', response.data);
-        onPartnerUpdated(response.data);
+        if (isWorkingOnProject) {
+          await axios.post(`http://localhost:8080/api/partners/addUserToProject`, null, {
+            params: { projectId: partnerData.id, email: userEmail },
+            headers: {
+              Authorization: `Basic ${btoa(`${userEmail}:${password}`)}`,
+            },
+          });
+        } else {
+          await axios.post(`http://localhost:8080/api/partners/removeUserFromProject`, null, {
+            params: { projectId: partnerData.id, email: userEmail },
+            headers: {
+              Authorization: `Basic ${btoa(`${userEmail}:${password}`)}`,
+            },
+          });
+        }
         onRequestClose();
+        refetchPartners();
       } else {
         console.error('Error updating partner:', response.statusText);
         setError('Error updating partner. Please try again.');
@@ -133,6 +149,14 @@ const EditPartnerModal: React.FC<EditPartnerModalProps> = ({ isOpen, onRequestCl
             type="checkbox"
             checked={active}
             onChange={(e) => setActive(e.target.checked)}
+          />
+        </div>
+        <div>
+          <label>I'm working on this project:</label>
+          <input
+            type="checkbox"
+            checked={isWorkingOnProject}
+            onChange={(e) => setIsWorkingOnProject(e.target.checked)}
           />
         </div>
         <button type="submit">Update Partner</button>
