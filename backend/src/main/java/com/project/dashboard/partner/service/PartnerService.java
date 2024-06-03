@@ -3,9 +3,13 @@ package com.project.dashboard.partner.service;
 import com.project.dashboard.partner.Partner;
 import com.project.dashboard.partner.PartnerRepository;
 import com.project.dashboard.partner.github.GitHubClient;
-import java.util.List;
+import com.project.dashboard.user.User;
+import com.project.dashboard.user.UserRepository;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class PartnerService {
@@ -16,13 +20,25 @@ public class PartnerService {
     @Autowired
     private GitHubClient gitHubClient;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private List<Partner> cachedPartners;
 
     public List<Partner> getAllPartners() {
         if (cachedPartners == null) {
             updatePartnerData();
         }
+        // Populate formatted users for each partner
+        cachedPartners.forEach(this::populateFormattedUsers);
         return cachedPartners;
+    }
+
+    public Partner getPartnerById(Long id) {
+        Partner partner = partnerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Partner not found"));
+        populateFormattedUsers(partner);
+        return partner;
     }
 
     public Partner addPartner(Partner partner, String userEmail) {
@@ -62,7 +78,59 @@ public class PartnerService {
         updatePartnerData();
     }
 
+    public Partner addUserToProject(Long projectId, String email) {
+        Partner partner = partnerRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Partner not found"));
+        User user = userRepository.findByEmail(email);
+
+        if (user != null) {
+            if (!partner.getUsersWorkingOnProject().contains(email)) {
+                partner.getUsersWorkingOnProject().add(email);
+                partnerRepository.save(partner);
+            }
+
+            if (!user.getProjectsWorkingOn().contains(partner.getName())) {
+                user.getProjectsWorkingOn().add(partner.getName());
+                userRepository.save(user);
+            }
+        }
+        updatePartnerData();
+        return partner;
+    }
+
+    public Partner removeUserFromProject(Long projectId, String email) {
+        Partner partner = partnerRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Partner not found"));
+        User user = userRepository.findByEmail(email);
+
+        if (user != null) {
+            if (partner.getUsersWorkingOnProject().contains(email)) {
+                partner.getUsersWorkingOnProject().remove(email);
+                partnerRepository.save(partner);
+            }
+
+            if (user.getProjectsWorkingOn().contains(partner.getName())) {
+                user.getProjectsWorkingOn().remove(partner.getName());
+                userRepository.save(user);
+            }
+        }
+        updatePartnerData();
+        return partner;
+    }
+
     private void updatePartnerData() {
         cachedPartners = partnerRepository.findAll();
+        cachedPartners.forEach(this::populateFormattedUsers);
     }
+
+    private void populateFormattedUsers(Partner partner) {
+        String formattedUsers = partner.getUsersWorkingOnProject().stream()
+                .map(email -> {
+                    User user = userRepository.findByEmail(email);
+                    return email + " (" + user.getName() + ")";
+                })
+                .collect(Collectors.joining(", "));
+        partner.setFormattedUsersWorkingOnProject(formattedUsers);
+    }
+
 }

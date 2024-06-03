@@ -1,9 +1,7 @@
 package com.project.dashboard.user;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import java.util.List;
 
 /**
  * Represents a user in the system.
@@ -23,7 +21,20 @@ public class User {
     private String email;
     private String password;
 
+    @ElementCollection
+    private List<String> projectsWorkingOn;
+
     // Getters and setters
+
+
+    // Getters and Setters for projectsWorkingOn
+    public List<String> getProjectsWorkingOn() {
+        return projectsWorkingOn;
+    }
+
+    public void setProjectsWorkingOn(List<String> projectsWorkingOn) {
+        this.projectsWorkingOn = projectsWorkingOn;
+    }
     public Long getId() {
         return id;
     }

@@ -4,6 +4,7 @@ import com.project.dashboard.partner.Partner;
 import com.project.dashboard.partner.service.PartnerService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,8 +15,15 @@ public class PartnerController {
     private PartnerService partnerService;
 
     @GetMapping
-    public List<Partner> getAllPartners() {
-        return partnerService.getAllPartners();
+    public ResponseEntity<List<Partner>> getAllPartners() {
+        List<Partner> partners = partnerService.getAllPartners();
+        return ResponseEntity.ok(partners);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Partner> getPartnerById(@PathVariable Long id) {
+        Partner partner = partnerService.getPartnerById(id);
+        return ResponseEntity.ok(partner);
     }
 
     @PostMapping
@@ -24,6 +32,18 @@ public class PartnerController {
             throw new IllegalArgumentException("Invalid GitHub repository URL");
         }
         return partnerService.addPartner(partner, userEmail);
+    }
+
+    @PostMapping("/addUserToProject")
+    public ResponseEntity<Partner> addUserToProject(@RequestParam Long projectId, @RequestParam String email) {
+        Partner updatedPartner = partnerService.addUserToProject(projectId, email);
+        return ResponseEntity.ok(updatedPartner);
+    }
+
+    @PostMapping("/removeUserFromProject")
+    public ResponseEntity<Partner> removeUserFromProject(@RequestParam Long projectId, @RequestParam String email) {
+        Partner updatedPartner = partnerService.removeUserFromProject(projectId, email);
+        return ResponseEntity.ok(updatedPartner);
     }
 
     @PutMapping("/{id}")
