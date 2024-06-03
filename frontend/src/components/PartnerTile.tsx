@@ -1,6 +1,7 @@
 import React from 'react';
 import { PartnerData } from '../types';
 import { formatDate } from '../utils/dateUtils';
+import '../App.css';
 
 interface PartnerTileProps {
   partnerData: PartnerData;

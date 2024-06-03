@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
 import { PartnerData } from '../types';
+import '../App.css';
 
 interface NewPartnerModalProps {
   isOpen: boolean;

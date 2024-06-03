@@ -105,7 +105,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div id="main-content">
-      <div>
+      <div className="sync-info">
         Last Synced: {lastSynced ? formatTimeSinceLastSync(secondsSinceLastSync) : 'Never'}
         <button onClick={() => {
           const userEmail = localStorage.getItem('userEmail');

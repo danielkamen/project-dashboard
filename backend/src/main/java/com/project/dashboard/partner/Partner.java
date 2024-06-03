@@ -1,9 +1,8 @@
 package com.project.dashboard.partner;
 
 import jakarta.persistence.*;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
-
 
 @Entity
 public class Partner {
@@ -19,8 +18,13 @@ public class Partner {
     private String lastUpdated;
     private String updatedBy;
 
-    @ElementCollection
-    private Set<String> usersWorkingOnProject;
+    // Specifies a collection of basic or embeddable types, fetched eagerly for immediate availability
+    @ElementCollection(fetch = FetchType.EAGER)
+
+    // Maps the collection to a separate table, linking via the specified foreign key
+    @CollectionTable(name = "partner_users_working_on_project", joinColumns = @JoinColumn(name = "partner_id"))
+    @Column(name = "users_working_on_project")
+    private Set<String> usersWorkingOnProject = new HashSet<>();
 
     @Transient
     private String formattedUsersWorkingOnProject;

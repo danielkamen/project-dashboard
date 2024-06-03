@@ -29,7 +29,6 @@ public class PartnerService {
         if (cachedPartners == null) {
             updatePartnerData();
         }
-        // Populate formatted users for each partner
         cachedPartners.forEach(this::populateFormattedUsers);
         return cachedPartners;
     }
@@ -127,10 +126,9 @@ public class PartnerService {
         String formattedUsers = partner.getUsersWorkingOnProject().stream()
                 .map(email -> {
                     User user = userRepository.findByEmail(email);
-                    return email + " (" + user.getName() + ")";
+                    return email + " (" + (user != null ? user.getName() : "Unknown User") + ")";
                 })
                 .collect(Collectors.joining(", "));
         partner.setFormattedUsersWorkingOnProject(formattedUsers);
     }
-
 }

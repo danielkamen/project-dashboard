@@ -36,7 +36,6 @@ public class GitHubClient {
                 return null;
             }
         } catch (Exception e) {
-            // Handle exceptions
             e.printStackTrace();
             return null;
         }

@@ -1,4 +1,4 @@
-/* MainDisplay */
+/* Dashboard */
 
 #main-content {
   width: 1000px;
@@ -31,7 +31,6 @@
 .sync-info button {
   padding: 5px 10px;
 }
-
 
 button {
   padding: 10px 20px;
@@ -70,7 +69,6 @@ h1.title {
 .partner-tile button:hover {
   background-color: #0056b3;
 }
-
 
 .partner-thumbnail {
   max-width: 100%;
